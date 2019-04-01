@@ -1,4 +1,4 @@
-import arithmetic_operators, comparison_operators, assignment_operators, bitwise_operators, logical_operators
+import arithmetic_operators, comparison_operators, assignment_operators, bitwise_operators, logical_operators, membership_operators
 
 if __name__ == '__main__':
     print('###  Arithmetic Operators ###')
@@ -41,3 +41,7 @@ if __name__ == '__main__':
     print('both_true', logical_operators.both_true(1 == 1, 2 > 1))
     print('any_true', logical_operators.any_true(1 != 1, 2 > 1))
     print('reverse_state', logical_operators.reverse_state(True))
+
+    print('\n###  Membership Operators ###')
+    print('is_inside', membership_operators.is_inside('c', ['b', 'c', 'a']))
+    print('is_not_inside', membership_operators.is_not_inside('z', ['b', 'c', 'a']))
