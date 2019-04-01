@@ -1,5 +1,6 @@
 import arithmetic_operators
 import comparison_operators
+import assignment_operators
 
 if __name__ == '__main__':
     print('###  Arithmetic Operators ###')
@@ -20,3 +21,12 @@ if __name__ == '__main__':
     print('left_greater_equal(6, 6) =', comparison_operators.left_greater_equal(6, 6))
     print('left_lesser_equal(3, 6) =', comparison_operators.left_lesser_equal(3, 6))
     print('left_lesser_equal(6, 6) =', comparison_operators.left_lesser_equal(6, 6))
+
+    print('\n###  Assignment Operators ###')
+    print('dog_name', assignment_operators.dog_name)
+    print('dog_age', assignment_operators.dog_age)
+    print('dog_toy_count', assignment_operators.dog_toy_count)
+    print('dog_friends_count', assignment_operators.dog_friends_count)
+    print('dog_treats_count', assignment_operators.dog_treats_count)
+    print('dog_sibling_count', assignment_operators.dog_sibling_count)
+    print('dog_son_count', assignment_operators.dog_son_count)
