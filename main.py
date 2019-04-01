@@ -1,4 +1,4 @@
-import arithmetic_operators, comparison_operators, assignment_operators, bitwise_operators
+import arithmetic_operators, comparison_operators, assignment_operators, bitwise_operators, logical_operators
 
 if __name__ == '__main__':
     print('###  Arithmetic Operators ###')
@@ -36,3 +36,8 @@ if __name__ == '__main__':
     print('binary_once_comp', bitwise_operators.binary_once_comp(60))
     print('binary_left_shift', bitwise_operators.binary_left_shift(60, 2))
     print('binary_right_shift', bitwise_operators.binary_right_shift(60, 2))
+
+    print('\n###  Logical Operators ###')
+    print('both_true', logical_operators.both_true(1 == 1, 2 > 1))
+    print('any_true', logical_operators.any_true(1 != 1, 2 > 1))
+    print('reverse_state', logical_operators.reverse_state(True))
