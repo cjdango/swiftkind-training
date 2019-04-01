@@ -1,4 +1,11 @@
-import arithmetic_operators, comparison_operators, assignment_operators, bitwise_operators, logical_operators, membership_operators, identity_operators
+import
+arithmetic_operators,
+comparison_operators,
+assignment_operators,
+bitwise_operators,
+logical_operators,
+membership_operators,
+identity_operators
 
 if __name__ == '__main__':
     print('###  Arithmetic Operators ###')
@@ -15,19 +22,27 @@ if __name__ == '__main__':
     print('not_equal(3, 1) =', comparison_operators.not_equal(3, 1))
     print('left_greater(3, 1) =', comparison_operators.left_greater(3, 1))
     print('left_lesser(1, 5) =', comparison_operators.left_lesser(1, 5))
-    print('left_greater_equal(3, 6) =', comparison_operators.left_greater_equal(3, 6))
-    print('left_greater_equal(6, 6) =', comparison_operators.left_greater_equal(6, 6))
-    print('left_lesser_equal(3, 6) =', comparison_operators.left_lesser_equal(3, 6))
-    print('left_lesser_equal(6, 6) =', comparison_operators.left_lesser_equal(6, 6))
+    print('left_greater_equal(3, 6) =',
+          comparison_operators.left_greater_equal(3, 6))
+    print('left_greater_equal(6, 6) =',
+          comparison_operators.left_greater_equal(6, 6))
+    print('left_lesser_equal(3, 6) =',
+          comparison_operators.left_lesser_equal(3, 6))
+    print('left_lesser_equal(6, 6) =',
+          comparison_operators.left_lesser_equal(6, 6))
 
     print('\n###  Assignment Operators ###')
     print('get_dog_name', assignment_operators.get_dog_name('Jonathan'))
     print('get_dog_age', assignment_operators.get_dog_age(3))
     print('get_dog_toy_count', assignment_operators.get_dog_toy_count(4))
-    print('get_dog_friends_count', assignment_operators.get_dog_friends_count(10))
-    print('get_dog_treats_count', assignment_operators.get_dog_treats_count(24))
-    print('get_dog_sibling_count', assignment_operators.get_dog_sibling_count(2))
-    print('get_dog_son_count', assignment_operators.get_dog_son_count(10))
+    print('get_dog_friends_count',
+          assignment_operators.get_dog_friends_count(10))
+    print('get_dog_treats_count',
+          assignment_operators.get_dog_treats_count(24))
+    print('get_dog_sibling_count',
+          assignment_operators.get_dog_sibling_count(2))
+    print('get_dog_son_count',
+          assignment_operators.get_dog_son_count(10))
 
     print('\n###  Bitwise Operators ###')
     print('binary_and', bitwise_operators.binary_and(60, 13))
@@ -44,7 +59,8 @@ if __name__ == '__main__':
 
     print('\n###  Membership Operators ###')
     print('is_inside', membership_operators.is_inside('c', ['b', 'c', 'a']))
-    print('is_not_inside', membership_operators.is_not_inside('z', ['b', 'c', 'a']))
+    print('is_not_inside',
+          membership_operators.is_not_inside('z', ['b', 'c', 'a']))
 
     print('\n###  Identity Operators ###')
 
