@@ -1,11 +1,10 @@
-import
-arithmetic_operators,
-comparison_operators,
-assignment_operators,
-bitwise_operators,
-logical_operators,
-membership_operators,
-identity_operators
+import arithmetic_operators
+import comparison_operators
+import assignment_operators
+import bitwise_operators
+import logical_operators
+import membership_operators
+import identity_operators
 
 if __name__ == '__main__':
     print('###  Arithmetic Operators ###')
