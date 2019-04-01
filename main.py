@@ -1,6 +1,4 @@
-import arithmetic_operators
-import comparison_operators
-import assignment_operators
+import arithmetic_operators, comparison_operators, assignment_operators, bitwise_operators
 
 if __name__ == '__main__':
     print('###  Arithmetic Operators ###')
@@ -30,3 +28,11 @@ if __name__ == '__main__':
     print('get_dog_treats_count', assignment_operators.get_dog_treats_count(24))
     print('get_dog_sibling_count', assignment_operators.get_dog_sibling_count(2))
     print('get_dog_son_count', assignment_operators.get_dog_son_count(10))
+
+    print('\n###  Bitwise Operators ###')
+    print('binary_and', bitwise_operators.binary_and(60, 13))
+    print('binary_or', bitwise_operators.binary_or(60, 13))
+    print('binary_xor', bitwise_operators.binary_xor(60, 13))
+    print('binary_once_comp', bitwise_operators.binary_once_comp(60))
+    print('binary_left_shift', bitwise_operators.binary_left_shift(60, 2))
+    print('binary_right_shift', bitwise_operators.binary_right_shift(60, 2))
