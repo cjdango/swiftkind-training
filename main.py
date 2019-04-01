@@ -1,4 +1,4 @@
-import arithmetic_operators, comparison_operators, assignment_operators, bitwise_operators, logical_operators, membership_operators
+import arithmetic_operators, comparison_operators, assignment_operators, bitwise_operators, logical_operators, membership_operators, identity_operators
 
 if __name__ == '__main__':
     print('###  Arithmetic Operators ###')
@@ -45,3 +45,12 @@ if __name__ == '__main__':
     print('\n###  Membership Operators ###')
     print('is_inside', membership_operators.is_inside('c', ['b', 'c', 'a']))
     print('is_not_inside', membership_operators.is_not_inside('z', ['b', 'c', 'a']))
+
+    print('\n###  Identity Operators ###')
+
+    a = []
+    b = a
+    c = list(a)
+
+    print('same', identity_operators.same(a, c))
+    print('not_same', identity_operators.not_same(a, c))
