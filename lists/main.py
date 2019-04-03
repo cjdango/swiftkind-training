@@ -59,6 +59,9 @@ def is_inside(n, lst):
 
 
 def print_items(lst):
+    """
+    Print items inside a list
+    """
     for x in lst:
         print(x, end=' ')
 
