@@ -4,10 +4,18 @@ from .views import (
     BlogDetailView,
     BlogCreateView,
     BlogUpdateView,
-    BlogDeleteView
+    BlogDeleteView,
+    BlogCategoryView,
+    BlogTagView,
 )
 
 urlpatterns = [
+    path(
+        'tag/<slug:title>/', BlogTagView.as_view(), name="tag"),
+    path(
+        'category/<slug:title>/',
+        BlogCategoryView.as_view(),
+        name="category"),
     path(
         'post/<int:pk>/delete/',
         BlogDeleteView.as_view(),

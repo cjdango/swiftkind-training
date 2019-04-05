@@ -31,6 +31,19 @@
             <a href="{% url 'signup' %}">Sign Up</a> |
             <a href="{% url 'password_reset' %}">Forfot password?</a>
         {% endif %}
+
+        <div class="category-menu">
+            <span>Categories:</span>
+            <ul class="category-list">
+                {% for category in category_list %}
+                    <li>
+                        <a href="{% url 'category' category.slug %}">
+                            {{ category.title }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
         
         {% block content %}
         {% endblock content %}

@@ -4,7 +4,19 @@
     <div class="post-entry">
         <img src="{{ post.image.url}}" alt="{{ post.title }}">
         <h2>{{ post.title }}</h2>
-        <p>{{ post.body }}</p>
+        {% comment %} <p>{{ post.body }}</p> {% endcomment %}
+        <div class="post-tags">
+            <span>Tags:</span>
+            <ul class="post-tags-list">
+                {% for tag in post.tag.all %}
+                    <li class="post-tag">
+                        <a href="{% url 'tag' tag.slug %}">
+                            {{ tag.title }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
 
     {% if user.is_authenticated and user == post.author %}

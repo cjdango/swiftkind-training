@@ -23,6 +23,24 @@ header h1 a {
     padding-top: 2rem;
 }
 
+.post-tags-list,
+.category-list {
+    list-style: none;
+    padding-left: .5rem;
+}
+
+.post-tags-list>li,
+.category-list>li {
+    margin-right: .5rem;
+}
+
+.category-list,
+.post-tags-list,
+.category-list>li,
+.post-tags-list>li {
+    display: inline-block;
+}
+
 .post-entry {
     margin-bottom: 2rem;
 }
