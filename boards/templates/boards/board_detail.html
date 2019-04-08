@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Board detail{% endblock title %}
+
+{% block content %}
+    <input type="email" name="invite_email" placeholder="Enter email to invite" onkeypress="inviteUser(event, {{board.pk}})" />
+    <div class="lists">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="Add list" />
+        </form>
+        <ul class="list_list">
+            {% for list in board.list_set.all %}
+                <li class="list">
+                    {{list.title}}
+                    <span onclick="deleteList({{list.pk}})">X</span>
+
+                    <ul class="card_list">
+                        {% for card in list.card_set.all %}
+                            <li class="card">
+                                {{card.title}}
+                                <span onclick="deleteCard({{list.pk}}, {{card.pk}})">X</span>
+                            </li>
+                        {% endfor %}
+                        <li class="card">
+                            <input type="text" placeholder="Add card" onkeypress="addCard(event, {{list.pk}})" />
+                        </li>
+                    </ul>
+
+                </li>
+            {% endfor %}
+        </ul>
+    </div>    
+{% endblock content %}
+
+{% block app_script %}
+    <script>
+        function inviteUser(e) {
+            var email = e.target.value
+            if (e.keyCode === 13) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'invites/new/',
+                    data: { to: email },  
+                    contentType: 'application/json',
+                    success: function (data, textStatus, xhr) {  
+                        // window.location.href = data.redirect
+                        console.log(data)
+                    },  
+                    error: function (xhr, textStatus, errorThrown) {  
+                        console.log('Error in Operation');  
+                    }  
+                });
+            }
+        }
+
+        function deleteList(listPK) {
+            $.ajax({
+                type: 'DELETE',
+                data: { pk: listPK },  
+                contentType: 'application/json',
+                success: function (data, textStatus, xhr) {  
+                    window.location.href = data.redirect
+                },  
+                error: function (xhr, textStatus, errorThrown) {  
+                    console.log('Error in Operation');  
+                }  
+            });
+        }
+
+        function deleteCard(listPK, cardPK) {
+            $.ajax({
+                type: 'DELETE',
+                url: 'lists/' + listPK + '/cards/',
+                data: { pk: cardPK },  
+                contentType: 'application/json',
+                success: function (data, textStatus, xhr) {  
+                    window.location.href = data.redirect
+                },  
+                error: function (xhr, textStatus, errorThrown) {  
+                    console.log('Error in Operation');  
+                }  
+            });
+        }
+
+        function addCard(e, listPK) {
+            var cardTitle = e.target.value
+            if (e.keyCode === 13) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'lists/' + listPK + '/cards/',
+                    data: { title: cardTitle },  
+                    contentType: 'application/json',
+                    success: function (data, textStatus, xhr) {  
+                        window.location.href = data.redirect
+                    },  
+                    error: function (xhr, textStatus, errorThrown) {  
+                        console.log('Error in Operation');  
+                    }  
+                });
+            }
+        }
+    </script> 
+{% endblock app_script %}

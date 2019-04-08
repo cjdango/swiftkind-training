@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock title %}
+
+{% block content %}
+    <div class="boards">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="Add board" />
+        </form>
+        <ul class="board_list">
+            {% for board in boards %}
+                <li class="board">
+                    <a href="{% url 'boards:board_detail' pk=board.pk %}">
+                        {{board.title}}
+                    </a>
+                    {% if user == board.owner %}
+                        <span onclick="deleteBoard({{board.pk}})">X</span>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>   
+{% endblock content %}
+
+{% block app_script %}
+    <script>
+        function deleteBoard(boardPK) {
+            $.ajax({
+                type: 'DELETE',
+                data: { pk: boardPK },  
+                contentType: 'application/json',
+                success: function (data, textStatus, xhr) {  
+                    window.location.href = data.redirect
+                },  
+                error: function (xhr, textStatus, errorThrown) {  
+                    console.log('Error in Operation');  
+                }  
+            });
+        }
+    </script> 
+{% endblock app_script %}
