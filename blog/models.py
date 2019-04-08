@@ -38,6 +38,7 @@ class Tag(models.Model):
 
 
 class Post(models.Model):
+    slug = models.SlugField(unique=True, null=True)
     title = models.CharField(max_length=200)
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -53,5 +54,9 @@ class Post(models.Model):
     def __str__(self):
         return self.title
 
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.title)
+        super(Post, self).save(*args, **kwargs)
+
     def get_absolute_url(self):
-        return reverse('post_detail', args=[str(self.id)])
+        return reverse('post_detail', args=[str(self.slug)])
