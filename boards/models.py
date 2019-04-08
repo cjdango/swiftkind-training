@@ -15,6 +15,17 @@ class Board(models.Model):
         return self.title
 
 
+class BoardInvitation(models.Model):
+    frm = models.ForeignKey(Board, on_delete=models.CASCADE)
+    to = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.frm.title} -> {self.to.email}'
+    
+    def accept(self, request):
+        self.frm.members.add(request.user)
+        self.delete()
+
 class List(models.Model):
     title = models.CharField(max_length=50)
     board = models.ForeignKey(Board, on_delete=models.CASCADE)

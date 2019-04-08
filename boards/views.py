@@ -9,14 +9,15 @@ from django.forms.models import model_to_dict
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 
-from .models import Board, Card
+from .models import Board, Card, BoardInvitation
 from .forms import CreateBoardForm, CreateListForm
 
 
 class BoardInvitationEditView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         board = Board.objects.get(pk=kwargs.get('board_pk'))
-        board.members.add(self.request.user)
+        invitation = get_object_or_404(BoardInvitation, frm=board, to=self.request.user)
+        invitation.accept(request)
 
         return redirect(reverse_lazy(
             'boards:board_detail', args=[str(board.pk)]))
@@ -27,6 +28,8 @@ class BoardInvitationListView(LoginRequiredMixin, View):
         body = QueryDict(request.body)
         board = self.request.user.board_set.get(pk=kwargs.get('board_pk'))
         to = get_object_or_404(get_user_model(), email=body.get('to'))
+
+        BoardInvitation.objects.get_or_create(frm=board, to=to)
 
         send_mail(
             'Board Invitation',
@@ -134,7 +137,7 @@ class BoardDetailView(LoginRequiredMixin, View):
 
         return render(request, self.template_name, {
             'form': form,
-            'board': self.request.user.board_set.get(pk=kwargs.get('pk'))
+            'board': get_object_or_404(Board, members=self.request.user, pk=kwargs.get('pk'))
         })
 
 
