@@ -1,5 +1,5 @@
 .boards {
-    border: 1px solid red;
+    border: 1px solid #CCC;
 }
 
 .board_list {
@@ -13,7 +13,6 @@
 }
 
 .board_list > li.board {
-    border: 1px solid black;
     display: inline-block;
     padding: 20px;
     width: 200px;

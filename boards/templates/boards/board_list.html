@@ -1,22 +1,25 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 
 {% block title %}Home{% endblock title %}
 
 {% block content %}
     <div class="boards">
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <input type="submit" value="Add board" />
-        </form>
+        <div class="text-center w-25 mx-auto my-5">
+            <form method="post">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <input class="btn btn-success mx-auto" type="submit" value="Add board" />
+            </form>
+        </div>
         <ul class="board_list">
             {% for board in boards %}
-                <li class="board">
+                <li class="board card">
                     <a href="{% url 'boards:board_detail' pk=board.pk %}">
-                        {{board.title}}
+                        <h5 class="card-title">{{board.title}}</h5>
                     </a>
                     {% if user == board.owner %}
-                        <span onclick="deleteBoard({{board.pk}})">X</span>
+                        <button type="button" class="btn btn-link btn-sm text-danger" onclick="deleteBoard({{board.pk}})">remove</button>
                     {% endif %}
                 </li>
             {% endfor %}
