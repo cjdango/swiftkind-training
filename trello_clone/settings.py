@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'crispy_forms',
 
     # Local
     'users.apps.UsersConfig',
@@ -153,3 +154,5 @@ ACCOUNT_UNIQUE_EMAIL = True
 LOGIN_URL = 'account_login'
 LOGIN_REDIRECT_URL = 'boards:home'
 ACCOUNT_LOGOUT_REDIRECT_URL = 'boards:home'
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
