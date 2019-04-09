@@ -2,7 +2,8 @@
     border: 1px solid #CCC;
 }
 
-.board_list {
+.board_list,
+.list_list {
     display: flex;
     flex-flow: row wrap;
     align-items: center;
@@ -18,4 +19,8 @@
     width: 200px;
     text-align: center;
     margin: 0 10px 10px 10px;
+}
+
+.list_list {
+    justify-content: start;
 }

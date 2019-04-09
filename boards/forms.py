@@ -20,6 +20,15 @@ class CreateBoardForm(forms.ModelForm):
 
 
 class CreateListForm(forms.ModelForm):
+    title = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'placeholder': 'List title here...'
+        })
+    )
+
+    def __init__(self, *args, **kwargs):
+        super(CreateListForm, self).__init__(*args, **kwargs)
+        self.fields['title'].label = ''
 
     class Meta:
         model = List
