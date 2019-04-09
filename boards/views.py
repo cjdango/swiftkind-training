@@ -9,14 +9,15 @@ from django.forms.models import model_to_dict
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 
-from .models import Board, Card, BoardInvitation
+from .models import Board, Card, BoardInvitation, CardComment
 from .forms import CreateBoardForm, CreateListForm
 
 
 class BoardInvitationEditView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         board = Board.objects.get(pk=kwargs.get('board_pk'))
-        invitation = get_object_or_404(BoardInvitation, frm=board, to=self.request.user)
+        invitation = get_object_or_404(
+            BoardInvitation, frm=board, to=self.request.user)
         invitation.accept(request)
 
         return redirect(reverse_lazy(
@@ -137,11 +138,32 @@ class BoardDetailView(LoginRequiredMixin, View):
 
         return render(request, self.template_name, {
             'form': form,
-            'board': get_object_or_404(Board, members=self.request.user, pk=kwargs.get('pk'))
+            'board': get_object_or_404(Board, members=self.request.user,
+                                       pk=kwargs.get('pk'))
         })
 
 
 class CardListView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        board = self.request.user.board_set.get(pk=kwargs.get('board_pk'))
+        lst = board.list_set.get(pk=kwargs.get('list_pk'))
+        card = lst.card_set.get(pk=request.GET.get('pk'))
+        comments = list(card.cardcomment_set.values())
+        
+        for comment in comments:
+            comment['frm_email'] = get_user_model().objects.get(
+                pk=comment['frm_id']).email
+
+        return HttpResponse(
+            json.dumps({
+                'card': model_to_dict(card),
+                'card_comments': comments,
+                'redirect': reverse('boards:board_detail',
+                                    args=[str(board.pk)])
+            }),
+            content_type='application/json'
+        )
+
     def post(self, request, *args, **kwargs):
         body = QueryDict(request.body)
         board = self.request.user.board_set.get(pk=kwargs.get('board_pk'))
@@ -152,6 +174,23 @@ class CardListView(LoginRequiredMixin, View):
         return HttpResponse(
             json.dumps({
                 'created': model_to_dict(card),
+                'redirect': reverse('boards:board_detail',
+                                    args=[str(board.pk)])
+            }),
+            content_type='application/json'
+        )
+
+    def put(self, request, *args, **kwargs):
+        body = QueryDict(request.body)
+        board = self.request.user.board_set.get(pk=kwargs.get('board_pk'))
+        lst = board.list_set.get(pk=kwargs.get('list_pk'))
+        card = lst.card_set.get(pk=body.get('pk'))
+        comment = CardComment.objects.create(
+            comment=body.get('comment'), card=card, frm=self.request.user)
+
+        return HttpResponse(
+            json.dumps({
+                'commented': model_to_dict(comment),
                 'redirect': reverse('boards:board_detail',
                                     args=[str(board.pk)])
             }),

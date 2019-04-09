@@ -21,10 +21,11 @@ class BoardInvitation(models.Model):
 
     def __str__(self):
         return f'{self.frm.title} -> {self.to.email}'
-    
+
     def accept(self, request):
         self.frm.members.add(request.user)
         self.delete()
+
 
 class List(models.Model):
     title = models.CharField(max_length=50)
@@ -40,3 +41,12 @@ class Card(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class CardComment(models.Model):
+    comment = models.CharField(max_length=50)
+    card = models.ForeignKey(Card, on_delete=models.CASCADE)
+    frm = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.comment} -> {self.card}'
