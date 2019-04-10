@@ -1,3 +1,53 @@
+html, body, main {
+    height: 100%;
+    overflow: hidden;
+}
+
+.sidenav {
+    height: 100%;
+    width: 0;
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    right: 0;
+    background-color: rgb(46, 46, 46);
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+    color: #f1f1f1;
+}
+
+.sidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+}
+
+.sidenav a:hover {
+    color: #CCC;
+}
+
+.sidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+@media screen and (max-height: 450px) {
+    .sidenav {
+        padding-top: 15px;
+    }
+
+    .sidenav a {
+        font-size: 18px;
+    }
+}
+
 .boards {
     border: 1px solid #CCC;
 }
@@ -13,7 +63,7 @@
     padding: 0;
 }
 
-.board_list > li.board {
+.board_list>li.board {
     display: inline-block;
     padding: 20px;
     width: 200px;

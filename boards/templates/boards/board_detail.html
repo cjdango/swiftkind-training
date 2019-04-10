@@ -4,36 +4,45 @@
 {% block title %}Board detail{% endblock title %}
 
 {% block content %}
+    <div id="mySidenav" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <p class="lead text-center text-nowrap">Activity log</p>
+        <ul class="activity-log list-group list-group-flush"></ul>
+    </div>
+
     <!-- Modal -->
-        <div class="modal fade" id="card-modal" role="dialog">
-            <div class="modal-dialog">
-                <!-- Modal content-->
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Modal Header</h4>
+    <div class="modal fade" id="card-modal" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Modal Header</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Some text in the modal.</p>
+                    <div class="form-group">
+                        <textarea class="form-control new-comment" placeholder="Write a comment..."></textarea>
                     </div>
-                    <div class="modal-body">
-                        <p>Some text in the modal.</p>
-                        <div class="form-group">
-                            <textarea class="form-control new-comment" placeholder="Write a comment..."></textarea>
-                        </div>
-                        <button class="btn btn-success save-btn mb-3" onclick="saveComment()">Save</button>
-                        <div>
-                            <p class="lead mb-2">Comments</p>
-                            <ul class="card-comments list-group"></ul>
-                        </div>
+                    <button class="btn btn-success save-btn mb-3" onclick="saveComment()">Save</button>
+                    <div>
+                        <p class="lead mb-2">Comments</p>
+                        <ul class="card-comments list-group"></ul>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
+    </div>
     <div class="lists">
-        <div class="form-group form-inline">            
-            <input type="email" class="form-control mr-2" name="invite_email" placeholder="Enter email to invite" />
-            <button class="btn btn-primary form-control" onclick="inviteUser({{board.pk}})">Invite</button>
+        <div class="panel d-flex justify-content-between align-items-center">
+            <div class="form-group form-inline mb-0">            
+                <input id="invite-email" type="email" class="form-control mr-2" name="invite_email" placeholder="Enter email to invite" />
+                <button class="btn btn-primary form-control" onclick="inviteUser({{board.pk}})">Invite</button>
+            </div>
+            <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; More</span>
         </div>
         
         <ul class="list_list">
@@ -88,6 +97,8 @@
             comment.val('') 
         })
 
+        fetchActivityLog()
+
         function saveComment(cardPK, listPK) {
             $.ajax({
                 type: 'PUT',
@@ -97,6 +108,7 @@
                 success: function (data, textStatus, xhr) {  
                     comment.val('')
                     fetchCard(listPK, cardPK)
+                    fetchActivityLog()
                 },  
                 error: function (xhr, textStatus, errorThrown) {  
                     console.log('Error in Operation');  
@@ -113,6 +125,7 @@
                 success: function (data, textStatus, xhr) {  
                     // window.location.href = data.redirect
                     fetchCard(listPK, cardPK)
+                    fetchActivityLog()
                 },  
                 error: function (xhr, textStatus, errorThrown) {  
                     console.log('Error in Operation');  
@@ -125,6 +138,37 @@
             $("#card-modal .save-btn").attr("onclick", `saveComment(${cardPK}, ${listPK})`);
 
             fetchCard(listPK, cardPK)
+        }
+
+        function fetchActivityLog() {
+            $.ajax({
+                type: 'GET',
+                url: 'activity-log/',
+                contentType: 'application/json',
+                success: function (logs, textStatus, xhr) {
+                    let action = ''
+                    $('#mySidenav .activity-log').html('')
+                    logs.forEach(log => {
+                        switch(log.content_type) {
+                            case 'List':
+                                action = `${log.content} list.`
+                                break
+                            case 'Card':
+                                action = `${log.content} card on ${log.target} list.`
+                                break
+                            case 'CardComment':
+                                action = `<div class="badge badge-light">${log.content}</div> on ${log.target} card.`
+                        }
+                        $('#mySidenav .activity-log').append(
+                            `<li class="list-group-item d-flex justify-content-between 
+                                align-items-center bg-transparent border-light text-nowrap">
+                                <div>${log.actor} ${log.verb} ${action}</div></li>`)
+                    })
+                },  
+                error: function (xhr, textStatus, errorThrown) {  
+                    console.log('Error in Operation');  
+                }  
+            });
         }
 
         function fetchCard(listPK, cardPK) {
@@ -167,22 +211,21 @@
         }
 
         function inviteUser(e) {
-            var email = e.target.value
-            if (e.keyCode === 13) {
-                $.ajax({
-                    type: 'POST',
-                    url: 'invites/new/',
-                    data: { to: email },  
-                    contentType: 'application/json',
-                    success: function (data, textStatus, xhr) {  
-                        // window.location.href = data.redirect
-                        console.log(data)
-                    },  
-                    error: function (xhr, textStatus, errorThrown) {  
-                        console.log('Error in Operation');  
-                    }  
-                });
-            }
+            var email = $('#invite-email').val()
+            $.ajax({
+                type: 'POST',
+                url: 'invites/new/',
+                data: { to: email },  
+                contentType: 'application/json',
+                success: function (data, textStatus, xhr) {  
+                    // window.location.href = data.redirect
+                    console.log(data)
+                },  
+                error: function (xhr, textStatus, errorThrown) {  
+                    console.log('Error in Operation');  
+                }  
+            });
+            
         }
 
         function deleteList(listPK) {
@@ -231,6 +274,14 @@
                     }  
                 });
             }
+        }
+
+        function openNav() {
+            document.getElementById("mySidenav").style.width = "400px";
+        }
+
+        function closeNav() {
+            document.getElementById("mySidenav").style.width = "0";
         }
     </script> 
 {% endblock app_script %}

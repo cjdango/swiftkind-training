@@ -9,8 +9,40 @@ from django.forms.models import model_to_dict
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 
-from .models import Board, Card, BoardInvitation, CardComment
+from .models import (
+    Board,
+    Card,
+    BoardInvitation,
+    CardComment,
+    BoardActivityLog,
+    List,
+)
 from .forms import CreateBoardForm, CreateListForm
+
+
+class BoardActivityLogView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        board = get_object_or_404(
+            Board,
+            pk=kwargs.get('pk'),
+            members=self.request.user)
+        logs_queryset = BoardActivityLog.objects.filter(board=board)
+
+        logs_list = []
+
+        for log in logs_queryset:
+            logs_list.append({
+                'actor': log.actor.username,
+                'verb': log.verb,
+                'target': str(log.target),
+                'content': str(log.action),
+                'content_type': log.action.__class__.__name__
+            })
+
+        return HttpResponse(
+            json.dumps(logs_list),
+            content_type='application/json'
+        )
 
 
 class BoardInvitationEditView(LoginRequiredMixin, View):
@@ -110,9 +142,15 @@ class BoardDetailView(LoginRequiredMixin, View):
         form = self.form_class(request.POST)
 
         if form.is_valid():
-            board = form.save(commit=False)
-            board.board = get_object_or_404(Board, pk=kwargs.get('pk'))
-            board.save()
+            lst = form.save(commit=False)
+            lst.board = get_object_or_404(Board, pk=kwargs.get('pk'))
+            lst.save()
+            BoardActivityLog.objects.create(
+                board=lst.board,
+                actor=self.request.user,
+                verb='created',
+                target=lst.board,
+                action=lst)
             return redirect(self.request.path_info)
 
         return self.get_response(request, form, **kwargs)
@@ -172,6 +210,12 @@ class CardListView(LoginRequiredMixin, View):
         lst = board.list_set.get(pk=kwargs.get('list_pk'))
         card = Card(title=body.get('title'), lst=lst)
         card.save()
+        BoardActivityLog.objects.create(
+            board=board,
+            actor=self.request.user,
+            verb='created',
+            target=lst,
+            action=card)
 
         return HttpResponse(
             json.dumps({
@@ -201,6 +245,13 @@ class CardListView(LoginRequiredMixin, View):
 
         comment = CardComment.objects.create(
             comment=comment_context, card=card, frm=self.request.user)
+
+        BoardActivityLog.objects.create(
+            board=board,
+            actor=self.request.user,
+            verb='said',
+            target=card,
+            action=comment)
 
         return HttpResponse(
             json.dumps({

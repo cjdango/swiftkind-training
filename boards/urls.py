@@ -7,16 +7,19 @@ from .views import (
     BoardInvitationListView,
     BoardInvitationEditView,
     CardListView,
-    CardCommentView
+    CardCommentView,
+    BoardActivityLogView,
 )
 
 app_name = 'boards'
 urlpatterns = [
     path('', BoardListView.as_view(), name='home'),
     path('boards/<int:pk>/', BoardDetailView.as_view(), name='board_detail'),
+    path('boards/<int:pk>/activity-log/',
+         BoardActivityLogView.as_view(), name='activity_log'),
     path('boards/<int:board_pk>/lists/<int:list_pk>/cards/',
          CardListView.as_view(), name='card_list'),
-    path('boards/<int:board_pk>/lists/<int:list_pk>/' \
+    path('boards/<int:board_pk>/lists/<int:list_pk>/' +
          'cards/<int:card_pk>/comments/',
          CardCommentView.as_view(), name='comment_view'),
     path('boards/<int:board_pk>/invites/new/',

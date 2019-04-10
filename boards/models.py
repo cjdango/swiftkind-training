@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 
 
 class Board(models.Model):
@@ -13,6 +15,32 @@ class Board(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class BoardActivityLog(models.Model):
+    board = models.ForeignKey(Board, on_delete=models.CASCADE)
+    actor = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    verb = models.CharField(max_length=20)
+
+    target_content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        related_name='activiylog_target')
+
+    tartget_object_id = models.PositiveIntegerField()
+    target = GenericForeignKey(
+        'target_content_type',
+        'tartget_object_id')
+
+    action_content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        related_name='activiylog_action')
+
+    action_object_id = models.PositiveIntegerField()
+    action = GenericForeignKey(
+        'action_content_type',
+        'action_object_id')
 
 
 class BoardInvitation(models.Model):
@@ -49,4 +77,4 @@ class CardComment(models.Model):
     frm = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.comment} -> {self.card}'
+        return self.comment

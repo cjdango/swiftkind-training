@@ -24,8 +24,8 @@
             <a href="{% url 'account_login' %}">Log In</a> |
             <a href="{% url 'account_signup' %}">Sign Up</a>
         {% endif %}
-
-        <div class="container-fluid">
+        
+        <div class="container-fluid" style="position:relative; height: 100%;">
             {% block content %}
             {% endblock content %}
         </div>
