@@ -76,6 +76,8 @@
         const userPK = {{user.pk}}
     </script>
     <script>
+        const comment = $('#card-modal .new-comment')
+
         $('#card-modal').modal({
             backdrop: 'static',
             keyboard: false,
@@ -83,23 +85,17 @@
         });
 
         $('#card-modal').on('hidden.bs.modal', function () {
-            clearCommentTxtArea()
+            comment.val('') 
         })
 
-        function clearCommentTxtArea() {
-            const comment = $('#card-modal .new-comment')
-            comment.val('')  
-        }
-
         function saveComment(cardPK, listPK) {
-            const comment = $('#card-modal .new-comment')
             $.ajax({
                 type: 'PUT',
                 url: 'lists/' + listPK + '/cards/',
                 data: { pk: cardPK, comment: comment.val() },  
                 contentType: 'application/json',
                 success: function (data, textStatus, xhr) {  
-                    clearCommentTxtArea()
+                    comment.val('')
                     fetchCard(listPK, cardPK)
                 },  
                 error: function (xhr, textStatus, errorThrown) {  
@@ -146,11 +142,15 @@
                         const deleteBtn = c.frm_id === userPK ? 
                             `<button class="btn btn-link text-danger" 
                                 onclick="deleteComment(${listPK}, ${c.card_id}, ${c.id})">delete</button>` : ''
+                                
+                        const replyBtn = c.frm_id !== userPK ?
+                            `<button class="btn btn-link text-info" 
+                                onclick="onReply('${c.frm_username}', ${c.frm_id})">reply</button>` : ''
                         
                         $('#card-modal .card-comments').append(
                             `<li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span><strong>${c.frm_email}:</strong> ${c.comment}</span>
-                                ${deleteBtn}</li>`)
+                                <span><strong>${c.frm_username}:</strong>${c.comment}</span>
+                                ${replyBtn}${deleteBtn}</li>`)
                     })
 
                     console.log(data)
@@ -160,6 +160,10 @@
                     console.log('Error in Operation');  
                 }  
             });
+        }
+
+        function onReply(username, id) {
+            comment.val(`@${username} `).focus()
         }
 
         function inviteUser(e) {

@@ -151,8 +151,10 @@ class CardListView(LoginRequiredMixin, View):
         comments = list(card.cardcomment_set.values())
 
         for comment in comments:
-            comment['frm_email'] = get_user_model().objects.get(
-                pk=comment['frm_id']).email
+            frm_user = get_user_model().objects.get(
+                pk=comment['frm_id'])
+            comment['frm_email'] = frm_user.email
+            comment['frm_username'] = frm_user.username
 
         return HttpResponse(
             json.dumps({
@@ -185,8 +187,20 @@ class CardListView(LoginRequiredMixin, View):
         board = self.request.user.board_set.get(pk=kwargs.get('board_pk'))
         lst = board.list_set.get(pk=kwargs.get('list_pk'))
         card = lst.card_set.get(pk=body.get('pk'))
+
+        comment_context = body.get('comment')
+        tags = [s for s in comment_context.split() if "@" in s]
+
+        for tag in tags:
+            try:
+                get_user_model().objects.get(username=tag[1:])
+                styled_tag = f'<span class="text-info">{tag}</span>'
+                comment_context = comment_context.replace(tag, styled_tag)
+            except get_user_model().DoesNotExist:
+                pass
+
         comment = CardComment.objects.create(
-            comment=body.get('comment'), card=card, frm=self.request.user)
+            comment=comment_context, card=card, frm=self.request.user)
 
         return HttpResponse(
             json.dumps({
@@ -217,7 +231,6 @@ class CardListView(LoginRequiredMixin, View):
 class CardCommentView(LoginRequiredMixin, View):
     def delete(self, request, *args, **kwargs):
         body = QueryDict(request.body)
-        print(body.get('pk'))
         comment = get_object_or_404(
             CardComment,
             frm=self.request.user,
