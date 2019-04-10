@@ -73,6 +73,9 @@
 
 {% block app_script %}
     <script>
+        const userPK = {{user.pk}}
+    </script>
+    <script>
         $('#card-modal').modal({
             backdrop: 'static',
             keyboard: false,
@@ -105,6 +108,22 @@
             });    
         }
 
+        function deleteComment(listPK, cardPK, commentPK) {
+            $.ajax({
+                type: 'DELETE',
+                url: 'lists/' + listPK + '/cards/' + cardPK + '/comments/',
+                data: { pk: commentPK },  
+                contentType: 'application/json',
+                success: function (data, textStatus, xhr) {  
+                    // window.location.href = data.redirect
+                    fetchCard(listPK, cardPK)
+                },  
+                error: function (xhr, textStatus, errorThrown) {  
+                    console.log('Error in Operation');  
+                }  
+            });
+        }
+
         function showCardModal(listPK, cardPK, title) {
             $("#card-modal .modal-header").html(title)
             $("#card-modal .save-btn").attr("onclick", `saveComment(${cardPK}, ${listPK})`);
@@ -124,10 +143,14 @@
                     const comments = data.card_comments
                     $('#card-modal .card-comments').html('')
                     comments.forEach(c => {
-                        console.log(c)
+                        const deleteBtn = c.frm_id === userPK ? 
+                            `<button class="btn btn-link text-danger" 
+                                onclick="deleteComment(${listPK}, ${c.card_id}, ${c.id})">delete</button>` : ''
+                        
                         $('#card-modal .card-comments').append(
-                            `<li class="list-group-item">
-                                <strong>${c.frm_email}:</strong> ${c.comment}</li>`)
+                            `<li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><strong>${c.frm_email}:</strong> ${c.comment}</span>
+                                ${deleteBtn}</li>`)
                     })
 
                     console.log(data)

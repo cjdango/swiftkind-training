@@ -149,7 +149,7 @@ class CardListView(LoginRequiredMixin, View):
         lst = board.list_set.get(pk=kwargs.get('list_pk'))
         card = lst.card_set.get(pk=request.GET.get('pk'))
         comments = list(card.cardcomment_set.values())
-        
+
         for comment in comments:
             comment['frm_email'] = get_user_model().objects.get(
                 pk=comment['frm_id']).email
@@ -209,6 +209,24 @@ class CardListView(LoginRequiredMixin, View):
                 'deleted': model_to_dict(card),
                 'redirect': reverse('boards:board_detail',
                                     args=[str(board.pk)])
+            }),
+            content_type='application/json'
+        )
+
+
+class CardCommentView(LoginRequiredMixin, View):
+    def delete(self, request, *args, **kwargs):
+        body = QueryDict(request.body)
+        print(body.get('pk'))
+        comment = get_object_or_404(
+            CardComment,
+            frm=self.request.user,
+            pk=body.get('pk'))
+        comment.delete()
+
+        return HttpResponse(
+            json.dumps({
+                'deleted': model_to_dict(comment)
             }),
             content_type='application/json'
         )
