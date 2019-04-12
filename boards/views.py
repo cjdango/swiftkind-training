@@ -8,6 +8,7 @@ from django.http import QueryDict, HttpResponse, HttpResponseRedirect
 from django.forms.models import model_to_dict
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
+from django.contrib.auth.decorators import login_required
 
 from .models import (
     Board,
@@ -145,12 +146,14 @@ class BoardDetailView(LoginRequiredMixin, View):
             lst = form.save(commit=False)
             lst.board = get_object_or_404(Board, pk=kwargs.get('pk'))
             lst.save()
+
             BoardActivityLog.objects.create(
                 board=lst.board,
                 actor=self.request.user,
                 verb='created',
                 target=lst.board,
                 action=lst)
+
             return redirect(self.request.path_info)
 
         return self.get_response(request, form, **kwargs)
@@ -291,6 +294,85 @@ class CardCommentView(LoginRequiredMixin, View):
         return HttpResponse(
             json.dumps({
                 'deleted': model_to_dict(comment)
+            }),
+            content_type='application/json'
+        )
+
+
+@login_required
+def set_list_order(request, *args, **kwargs):
+    if request.method == 'POST':
+        board = get_object_or_404(
+            Board,
+            pk=kwargs.get('board_pk'),
+            members=request.user,
+        )
+
+        body = QueryDict(request.body)
+        order = body.getlist('order[]')
+
+        for idx, pos in enumerate(order):
+            lst = get_object_or_404(List, pk=pos, board=board)
+            lst.position = idx + 1
+            lst.save()
+
+        return HttpResponse(
+            json.dumps({
+                'order_set': 'success'
+            }),
+            content_type='application/json'
+        )
+
+
+@login_required
+def set_card_order(request, *args, **kwargs):
+    if request.method == 'POST':
+        board = get_object_or_404(
+            Board,
+            pk=kwargs.get('board_pk'),
+            members=request.user,
+        )
+        lst = get_object_or_404(List, pk=kwargs.get('list_pk'), board=board)
+
+        body = QueryDict(request.body)
+        order = body.getlist('order[]')
+
+        for idx, pos in enumerate(order):
+            card = get_object_or_404(Card, pk=pos, lst=lst)
+            card.position = idx + 1
+            card.save()
+
+        return HttpResponse(
+            json.dumps({
+                'order_set': 'success'
+            }),
+            content_type='application/json'
+        )
+
+
+@login_required
+def set_card_list(request, *args, **kwargs):
+    if request.method == 'PUT':
+        board = get_object_or_404(
+            Board,
+            pk=kwargs.get('board_pk'),
+            members=request.user,
+        )
+        lst = get_object_or_404(List, pk=kwargs.get('list_pk'), board=board)
+
+        body = QueryDict(request.body)
+        to_list_pk = body.get('to_list_pk')
+        card_pk = kwargs.get('card_pk')
+
+        card = get_object_or_404(Card, pk=card_pk, lst=lst)
+        to_list = get_object_or_404(List, pk=to_list_pk, board=board)
+
+        card.lst = to_list
+        card.save()
+
+        return HttpResponse(
+            json.dumps({
+                'set_card_list': 'success'
             }),
             content_type='application/json'
         )

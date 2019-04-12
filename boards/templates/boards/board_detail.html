@@ -53,29 +53,31 @@
                     <input class="btn btn-success border border-white" type="submit" value="Add list" />
                 </form>
             </li>
-            {% for list in board.list_set.all %}
-                <li class="list card bg-info text-white m-1 align-self-start">
-                    
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                        {{list.title|title}}
-                        <button class="btn btn-danger btn-sm" onclick="deleteList({{list.pk}})">X</button>
-                    </div>
-                    <ul class="card_list card-body text-dark">
-                        {% for card in list.card_set.all %}
-                            <li class="card mb-2" onclick="showCardModal({{list.pk}}, {{card.pk}}, '{{card.title|title}}')">
-                                <div class="card-body d-flex align-items-center justify-content-between">
-                                    {{card.title|title}}
-                                    <button class="btn btn-link text-danger p-0" onclick="deleteCard(event, {{list.pk}}, {{card.pk}})">X</button>
-                                </div>
-                            </li>
-                        {% endfor %}
-                        <li class="card form-group mb-0">
+            <div class="list_set d-flex">
+                {% for list in board.list_set.all %}
+                    <li class="list card bg-info text-white m-1 align-self-start" data-id="{{list.pk}}">
+                        
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            {{list.title|title}}
+                            <button class="btn btn-danger btn-sm" onclick="deleteList({{list.pk}})">X</button>
+                        </div>
+                        <div class="card-body">
+                            <ul class="card_list text-dark pl-0" data-id="{{list.pk}}">
+                                {% for card in list.card_set.all %}
+                                    <li class="card mb-2" onclick="showCardModal({{list.pk}}, {{card.pk}}, '{{card.title|title}}')" data-id="{{card.pk}}">
+                                        <div class="card-body d-flex align-items-center justify-content-between">
+                                            {{card.pk|title}}
+                                            <button class="btn btn-link text-danger p-0" onclick="deleteCard(event, {{list.pk}}, {{card.pk}})">X</button>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
                             <input type="text" class="form-control" placeholder="Add card" onkeypress="addCard(event, {{list.pk}})" />
-                        </li>
-                    </ul>
+                        </div>
 
-                </li>
-            {% endfor %}
+                    </li>
+                {% endfor %}
+            </div>
         </ul>
     </div>    
 {% endblock content %}
@@ -96,6 +98,86 @@
         $('#card-modal').on('hidden.bs.modal', function () {
             comment.val('') 
         })
+
+        
+        $( ".card_list" ).each(function( index, el ) {
+            Sortable.create(el, { 
+                animation: 150, 
+                group: 'cards', 
+                ghostClass: 'bg-warning',
+                store: {
+                    set: function (sortable) {
+                        var order = sortable.toArray();
+                        const listPK = $(sortable.el).data('id')
+                        console.log(order)
+                        $.ajax({
+                            type: 'POST',
+                            url: 'lists/' + listPK + '/cards/set-order/',
+                            data: { order },
+                            contentType: 'application/json',
+                            success: function (data, textStatus, xhr) {  
+                                console.log(data)
+                            },  
+                            error: function (xhr, textStatus, errorThrown) {  
+                                console.log('Error in Operation');  
+                            }  
+                        });
+                    }
+                },
+                onSort: function(evt) {
+                    const fromListPK = $(evt.from).data('id')
+                    const toListPK = $(evt.to).data('id')
+                    const cardPK = $(evt.item).data('id')
+
+                    if (fromListPK !== toListPK) {
+                        $.ajax({
+                            type: 'PUT',
+                            url: 'lists/' + fromListPK + '/cards/' + cardPK + '/set-list/',
+                            data: { to_list_pk: toListPK },  
+                            contentType: 'application/json',
+                            success: function (data, textStatus, xhr) {  
+                                console.log(data)
+                            },  
+                            error: function (xhr, textStatus, errorThrown) {  
+                                console.log('Error in Operation');  
+                            }  
+                        });
+                    }
+                }
+            });
+        });
+
+        $( ".list_set" ).each(function( index, el ) {
+            Sortable.create(el, { 
+                animation: 150, 
+                group: 'lists', 
+                ghostClass: 'bg-warning',
+                store: {
+                    set: function (sortable) {
+                        var order = sortable.toArray();
+                        console.log(order)
+                        $.ajax({
+                            type: 'POST',
+                            url: 'lists/set-order/',
+                            data: { order },  
+                            contentType: 'application/json',
+                            success: function (data, textStatus, xhr) {  
+                                // comment.val('')
+                                // fetchCard(listPK, cardPK)
+                                // fetchActivityLog()
+                                console.log(data)
+                            },  
+                            error: function (xhr, textStatus, errorThrown) {  
+                                console.log('Error in Operation');  
+                            }  
+                        });    
+                    }
+                },
+                onSort: function(evt) {
+
+                }
+            });
+        });
 
         fetchActivityLog()
 

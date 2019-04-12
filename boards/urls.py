@@ -9,6 +9,9 @@ from .views import (
     CardListView,
     CardCommentView,
     BoardActivityLogView,
+    set_list_order,
+    set_card_order,
+    set_card_list,
 )
 
 app_name = 'boards'
@@ -17,8 +20,15 @@ urlpatterns = [
     path('boards/<int:pk>/', BoardDetailView.as_view(), name='board_detail'),
     path('boards/<int:pk>/activity-log/',
          BoardActivityLogView.as_view(), name='activity_log'),
+    path('boards/<int:board_pk>/lists/set-order/',
+         set_list_order, name='set_list_order'),
+    path('boards/<int:board_pk>/lists/<int:list_pk>/cards/set-order/',
+         set_card_order, name='set_card_order'),
     path('boards/<int:board_pk>/lists/<int:list_pk>/cards/',
          CardListView.as_view(), name='card_list'),
+    path('boards/<int:board_pk>/lists/<int:list_pk>/' +
+         'cards/<int:card_pk>/set-list/',
+         set_card_list, name='set_card_list'),
     path('boards/<int:board_pk>/lists/<int:list_pk>/' +
          'cards/<int:card_pk>/comments/',
          CardCommentView.as_view(), name='comment_view'),

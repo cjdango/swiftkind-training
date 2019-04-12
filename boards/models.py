@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Max
 
 
 class Board(models.Model):
@@ -58,17 +59,39 @@ class BoardInvitation(models.Model):
 class List(models.Model):
     title = models.CharField(max_length=50)
     board = models.ForeignKey(Board, on_delete=models.CASCADE)
+    position = models.PositiveIntegerField()
+
+    class Meta:
+        ordering = ['position']
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        max_pos = List.objects.all().aggregate(Max('position'))
+        if self.position is None:
+            self.position = (max_pos.get('position__max') or 0) + 1
+
+        return super(List, self).save(*args, **kwargs)
 
 
 class Card(models.Model):
     title = models.CharField(max_length=50)
     lst = models.ForeignKey(List, on_delete=models.CASCADE)
+    position = models.PositiveIntegerField()
+
+    class Meta:
+        ordering = ['position']
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        max_pos = Card.objects.all().aggregate(Max('position'))
+        if self.position is None:
+            self.position = (max_pos.get('position__max') or 0) + 1
+
+        return super(Card, self).save(*args, **kwargs)
 
 
 class CardComment(models.Model):
