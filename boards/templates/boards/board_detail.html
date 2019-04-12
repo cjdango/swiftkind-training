@@ -6,7 +6,13 @@
 {% block content %}
     <div id="mySidenav" class="sidenav">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-        <p class="text-center"><button class="btn btn-link text-danger" onclick="leaveBoard({{board.pk}})">Leave Board</button></p>
+        <p class="text-center text-nowrap"><button class="btn btn-link text-danger" onclick="leaveBoard()">
+            {% if user == board.owner %}
+                Archive Board
+            {% else %}
+                Leave Board
+            {% endif %}
+        </button></p>
         <p class="lead text-center text-nowrap">Activity log</p>
         <ul class="activity-log list-group list-group-flush"></ul>
     </div>
@@ -191,7 +197,7 @@
                 url: 'leave-board/',
                 contentType: 'application/json',
                 success: function (data, textStatus, xhr) {  
-                    window.location.href = data.redirect
+                   window.location.href = data.redirect
                 },  
                 error: function (xhr, textStatus, errorThrown) {  
                     console.log('Error in Operation');  
@@ -348,18 +354,20 @@
                     const comments = data.card_comments
                     $('#card-modal .card-comments').html('')
                     comments.forEach(c => {
-                        const deleteBtn = c.frm_id === userPK ? 
+                        if (!c.is_archived) {
+                            const deleteBtn = c.frm_id === userPK ? 
                             `<button class="btn btn-link text-danger" 
                                 onclick="deleteComment(${listPK}, ${c.card_id}, ${c.id})">delete</button>` : ''
                                 
-                        const replyBtn = c.frm_id !== userPK ?
-                            `<button class="btn btn-link text-info" 
-                                onclick="onReply('${c.frm_username}', ${c.frm_id})">reply</button>` : ''
-                        
-                        $('#card-modal .card-comments').append(
-                            `<li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span><strong>${c.frm_username}:</strong>${c.comment}</span>
-                                ${replyBtn}${deleteBtn}</li>`)
+                            const replyBtn = c.frm_id !== userPK ?
+                                `<button class="btn btn-link text-info" 
+                                    onclick="onReply('${c.frm_username}', ${c.frm_id})">reply</button>` : ''
+                            
+                            $('#card-modal .card-comments').append(
+                                `<li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span><strong>${c.frm_username}:</strong>${c.comment}</span>
+                                    ${replyBtn}${deleteBtn}</li>`)
+                        }
                     })
 
                     console.log(data)

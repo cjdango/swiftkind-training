@@ -129,7 +129,7 @@ class BoardListView(LoginRequiredMixin, View):
 
         return render(request, self.template_name, {
             'form': form,
-            'boards': self.request.user.board_set.all()
+            'boards': self.request.user.board_set.filter(is_archived=False)
         })
 
 
@@ -182,7 +182,7 @@ class BoardDetailView(LoginRequiredMixin, View):
         return render(request, self.template_name, {
             'form': form,
             'board': get_object_or_404(Board, members=self.request.user,
-                                       pk=kwargs.get('pk'))
+                                       pk=kwargs.get('pk'), is_archived=False)
         })
 
 
@@ -433,20 +433,22 @@ def leave_board(request, *args, **kwargs):
             members=request.user)
 
         if board.owner == request.user:
+            board.is_archived = True
+            board.save()
             return HttpResponse(
                 json.dumps({
-                    'leave_board': 'failed',
-                    'message': 'owner cannot leave his board'
-                }),
-                content_type='application/json'
-            )
-        
-        board.members.remove(request.user)
-
-        return HttpResponse(
-                json.dumps({
-                    'leave_board': 'success',
+                    'archived_board': 'success',
                     'redirect': reverse('boards:home')
                 }),
                 content_type='application/json'
             )
+
+        board.members.remove(request.user)
+
+        return HttpResponse(
+            json.dumps({
+                'leave_board': 'success',
+                'redirect': reverse('boards:home')
+            }),
+            content_type='application/json'
+        )
