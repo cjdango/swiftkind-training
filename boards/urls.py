@@ -13,6 +13,7 @@ from .views import (
     set_card_order,
     set_card_list,
     set_list_title,
+    set_card_title,
 )
 
 app_name = 'boards'
@@ -23,10 +24,12 @@ urlpatterns = [
          BoardActivityLogView.as_view(), name='activity_log'),
     path('boards/<int:board_pk>/lists/set-order/',
          set_list_order, name='set_list_order'),
-    path('boards/<int:board_pk>/lists/<int:list_pk>/',
+    path('boards/<int:board_pk>/lists/<int:list_pk>/set-title/',
          set_list_title, name='set_list_title'),
     path('boards/<int:board_pk>/lists/<int:list_pk>/cards/set-order/',
          set_card_order, name='set_card_order'),
+    path('boards/<int:board_pk>/lists/<int:list_pk>/cards/<int:card_pk>/set-title/',
+         set_card_title, name='set_card_title'),
     path('boards/<int:board_pk>/lists/<int:list_pk>/cards/',
          CardListView.as_view(), name='card_list'),
     path('boards/<int:board_pk>/lists/<int:list_pk>/' +
