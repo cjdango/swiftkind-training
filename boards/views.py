@@ -376,3 +376,27 @@ def set_card_list(request, *args, **kwargs):
             }),
             content_type='application/json'
         )
+
+
+@login_required
+def set_list_title(request, *args, **kwargs):
+    if request.method == 'PUT':
+        body = QueryDict(request.body)
+        board = get_object_or_404(
+            Board,
+            pk=kwargs.get('board_pk'),
+            members=request.user,
+        )
+        lst = get_object_or_404(List, pk=kwargs.get('list_pk'), board=board)
+
+        title = body.get('title')
+        lst.title = title
+        lst.save()
+        print(lst.title)
+
+        return HttpResponse(
+            json.dumps({
+                'set_list_title': 'success'
+            }),
+            content_type='application/json'
+        )

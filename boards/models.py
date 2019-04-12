@@ -68,8 +68,8 @@ class List(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
-        max_pos = List.objects.all().aggregate(Max('position'))
         if self.position is None:
+            max_pos = List.objects.all().aggregate(Max('position'))
             self.position = (max_pos.get('position__max') or 0) + 1
 
         return super(List, self).save(*args, **kwargs)
