@@ -113,10 +113,11 @@ class BoardListView(LoginRequiredMixin, View):
     def delete(self, request, *args, **kwargs):
         body = QueryDict(request.body)
         board = self.request.user.board_set.get(pk=body.get('pk'))
-        board.delete()
+        board.is_archived = True
+        board.save()
         return HttpResponse(
             json.dumps({
-                'deleted': model_to_dict(board),
+                'archived': model_to_dict(board),
                 'redirect': reverse('boards:home')
             }),
             content_type='application/json'
@@ -163,10 +164,11 @@ class BoardDetailView(LoginRequiredMixin, View):
         board = self.request.user.board_set.get(pk=kwargs.get('pk'))
         lst = board.list_set.get(pk=body.get('pk'))
 
-        lst.delete()
+        lst.is_archived = True
+        lst.save()
         return HttpResponse(
             json.dumps({
-                'deleted': model_to_dict(lst),
+                'archived': model_to_dict(lst),
                 'redirect': reverse('boards:board_detail',
                                     args=[str(board.pk)])
             }),
@@ -270,11 +272,12 @@ class CardListView(LoginRequiredMixin, View):
         board = self.request.user.board_set.get(pk=kwargs.get('board_pk'))
         lst = board.list_set.get(pk=kwargs.get('list_pk'))
         card = lst.card_set.get(pk=body.get('pk'))
-        card.delete()
+        card.is_archived = True
+        card.save()
 
         return HttpResponse(
             json.dumps({
-                'deleted': model_to_dict(card),
+                'archived': model_to_dict(card),
                 'redirect': reverse('boards:board_detail',
                                     args=[str(board.pk)])
             }),
@@ -289,11 +292,12 @@ class CardCommentView(LoginRequiredMixin, View):
             CardComment,
             frm=self.request.user,
             pk=body.get('pk'))
-        comment.delete()
+        comment.is_archived = True
+        comment.save()
 
         return HttpResponse(
             json.dumps({
-                'deleted': model_to_dict(comment)
+                'archived': model_to_dict(comment)
             }),
             content_type='application/json'
         )
@@ -419,3 +423,30 @@ def set_card_title(request, *args, **kwargs):
             }),
             content_type='application/json'
         )
+
+
+@login_required
+def leave_board(request, *args, **kwargs):
+    if request.method == 'POST':
+        board = get_object_or_404(
+            Board, pk=kwargs.get('pk'),
+            members=request.user)
+
+        if board.owner == request.user:
+            return HttpResponse(
+                json.dumps({
+                    'leave_board': 'failed',
+                    'message': 'owner cannot leave his board'
+                }),
+                content_type='application/json'
+            )
+        
+        board.members.remove(request.user)
+
+        return HttpResponse(
+                json.dumps({
+                    'leave_board': 'success',
+                    'redirect': reverse('boards:home')
+                }),
+                content_type='application/json'
+            )

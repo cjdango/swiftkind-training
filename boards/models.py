@@ -13,6 +13,7 @@ class Board(models.Model):
         related_name='board_owned_set')
     members = models.ManyToManyField(
         get_user_model(), related_name='board_set')
+    is_archived = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
@@ -60,6 +61,7 @@ class List(models.Model):
     title = models.CharField(max_length=50)
     board = models.ForeignKey(Board, on_delete=models.CASCADE)
     position = models.PositiveIntegerField()
+    is_archived = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['position']
@@ -79,6 +81,7 @@ class Card(models.Model):
     title = models.CharField(max_length=50)
     lst = models.ForeignKey(List, on_delete=models.CASCADE)
     position = models.PositiveIntegerField()
+    is_archived = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['position']
@@ -98,6 +101,7 @@ class CardComment(models.Model):
     comment = models.CharField(max_length=50)
     card = models.ForeignKey(Card, on_delete=models.CASCADE)
     frm = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    is_archived = models.BooleanField(default=False)
 
     def __str__(self):
         return self.comment

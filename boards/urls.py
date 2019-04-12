@@ -14,12 +14,14 @@ from .views import (
     set_card_list,
     set_list_title,
     set_card_title,
+    leave_board,
 )
 
 app_name = 'boards'
 urlpatterns = [
     path('', BoardListView.as_view(), name='home'),
     path('boards/<int:pk>/', BoardDetailView.as_view(), name='board_detail'),
+    path('boards/<int:pk>/leave-board/', leave_board, name='leave_board'),
     path('boards/<int:pk>/activity-log/',
          BoardActivityLogView.as_view(), name='activity_log'),
     path('boards/<int:board_pk>/lists/set-order/',
