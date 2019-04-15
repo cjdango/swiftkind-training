@@ -161,6 +161,15 @@ class BoardDetailView(LoginRequiredMixin, View):
                 target=lst.board,
                 action=lst)
 
+            for member in lst.board.members.exclude(email=request.user):
+                send_mail(
+                    'Board activity',
+                    f'{request.user.username} created {lst} list in {lst.board} board.',
+                    'trello.clone@example.com',
+                    [member.email],
+                    fail_silently=False,
+                )
+
             return redirect(self.request.path_info)
 
         return self.get_response(request, form, **kwargs)
@@ -221,12 +230,22 @@ class CardListView(LoginRequiredMixin, View):
         lst = board.list_set.get(pk=kwargs.get('list_pk'))
         card = Card(title=body.get('title'), lst=lst)
         card.save()
+
         BoardActivityLog.objects.create(
             board=board,
             actor=self.request.user,
             verb='created',
             target=lst,
             action=card)
+
+        for member in lst.board.members.exclude(email=request.user):
+            send_mail(
+                'Board activity',
+                f'{request.user.username} created {card} card in {lst} list, {board} board.',
+                'trello.clone@example.com',
+                [member.email],
+                fail_silently=False,
+            )
 
         return HttpResponse(
             json.dumps({
@@ -263,6 +282,15 @@ class CardListView(LoginRequiredMixin, View):
             verb='said',
             target=card,
             action=comment)
+
+        for member in lst.board.members.exclude(email=request.user):
+            send_mail(
+                'Board activity',
+                f'{request.user.username} said {comment_context} in {card} card, {lst} list, {board} board.',
+                'trello.clone@example.com',
+                [member.email],
+                fail_silently=False,
+            )
 
         return HttpResponse(
             json.dumps({
