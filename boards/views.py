@@ -460,6 +460,7 @@ def leave_board(request, *args, **kwargs):
         )
 
 
+@login_required
 def fetch_archived_lists(request, *args, **kwargs):
     if request.method == 'GET':
         archived_lists = get_list_or_404(
@@ -480,6 +481,7 @@ def fetch_archived_lists(request, *args, **kwargs):
         )
 
 
+@login_required
 def fetch_archived_cards(request, *args, **kwargs):
     if request.method == 'GET':
         archived_cards = get_list_or_404(
@@ -500,6 +502,7 @@ def fetch_archived_cards(request, *args, **kwargs):
         )
 
 
+@login_required
 def unarchive_list(request, *args, **kwargs):
     if request.method == 'PUT':
         body = QueryDict(request.body)
@@ -520,6 +523,7 @@ def unarchive_list(request, *args, **kwargs):
         )
 
 
+@login_required
 def unarchive_card(request, *args, **kwargs):
     if request.method == 'PUT':
         body = QueryDict(request.body)
