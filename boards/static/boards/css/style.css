@@ -74,3 +74,10 @@ html, body, main {
 .list_list {
     justify-content: start;
 }
+
+.popover.popover-search-boards {
+    max-width: 500px;
+    max-height: 300px;
+    left: 9px !important;
+    overflow: auto;
+}

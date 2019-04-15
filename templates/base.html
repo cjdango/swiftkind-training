@@ -16,14 +16,40 @@
 
 <body>
     <main>
-        {% if user.is_authenticated %}
-            Hi {{ user.username }}!
-            <p><a href="{% url 'account_logout' %}">Log Out</a></p>
-        {% else %}
-            <p>You are not logged in</p>
-            <a href="{% url 'account_login' %}">Log In</a> |
-            <a href="{% url 'account_signup' %}">Sign Up</a>
-        {% endif %}
+        <div class="container-fluid">
+            {% if user.is_authenticated %}
+                <div class="d-flex justify-content-between align-items-center">
+                    <div id="boards-search" class=" w-25 d-flex">
+                        <input class="search form-control" placeholder="Search... (board name, board owner)" />
+                        <div class="list-wrapper d-none">
+                            <div class="list list-group list-group-flush w-100">
+                                {% for board in user.board_set.all %}
+                                    {% if not board.is_archived %}
+                                        <a href="{% url 'boards:board_detail' pk=board.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                            <h5 class="title mb-0">{{board.title}}</h5>
+                                            {% if board.owner == user %}
+                                                <span class="badge badge-primary badge-pill owner">{{board.owner.username}}</span>
+                                            {% else %}
+                                                <span class="badge badge-secondary badge-pill owner">{{board.owner.username}}</span>
+                                            {% endif %}
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        Hi {{ user.username }}!
+                        <p><a href="{% url 'account_logout' %}">Log Out</a></p>
+                    </div>
+                </div>
+            {% else %}
+                <p>You are not logged in</p>
+                <a href="{% url 'account_login' %}">Log In</a> |
+                <a href="{% url 'account_signup' %}">Sign Up</a>
+            {% endif %} 
+        </div>
         
         <div class="container-fluid" style="position:relative; height: 100%;">
             {% block content %}
@@ -35,6 +61,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js" integrity="sha256-YqOIp4MygNx9/lcWr5lpcR88Ki/MNMWvJJkH0eK+fHM=" crossorigin="anonymous"></script>
     <script src="{% static 'boards/js/app.js' %}"></script>
     {% block app_script %}
     {% endblock app_script %}
