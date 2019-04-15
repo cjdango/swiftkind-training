@@ -1,6 +1,11 @@
 import json
 
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import (
+    render,
+    redirect,
+    get_object_or_404,
+    get_list_or_404
+)
 from django.urls import reverse, reverse_lazy
 from django.views.generic import View
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -27,7 +32,8 @@ class BoardActivityLogView(LoginRequiredMixin, View):
             Board,
             pk=kwargs.get('pk'),
             members=self.request.user)
-        logs_queryset = BoardActivityLog.objects.filter(board=board)
+        logs_queryset = BoardActivityLog.objects.filter(
+            board=board).order_by('-pk')
 
         logs_list = []
 
@@ -449,6 +455,86 @@ def leave_board(request, *args, **kwargs):
             json.dumps({
                 'leave_board': 'success',
                 'redirect': reverse('boards:home')
+            }),
+            content_type='application/json'
+        )
+
+
+def fetch_archived_lists(request, *args, **kwargs):
+    if request.method == 'GET':
+        archived_lists = get_list_or_404(
+            List,
+            board__pk=kwargs.get('board_pk'),
+            board__members=request.user,
+            is_archived=True
+        )
+
+        for idx, lst in enumerate(archived_lists):
+            archived_lists[idx] = model_to_dict(lst)
+
+        return HttpResponse(
+            json.dumps({
+                'archived_lists': archived_lists
+            }),
+            content_type='application/json'
+        )
+
+
+def fetch_archived_cards(request, *args, **kwargs):
+    if request.method == 'GET':
+        archived_cards = get_list_or_404(
+            Card,
+            lst__board__pk=kwargs.get('board_pk'),
+            lst__board__members=request.user,
+            is_archived=True
+        )
+
+        for idx, card in enumerate(archived_cards):
+            archived_cards[idx] = model_to_dict(card)
+
+        return HttpResponse(
+            json.dumps({
+                'archived_cards': archived_cards
+            }),
+            content_type='application/json'
+        )
+
+
+def unarchive_list(request, *args, **kwargs):
+    if request.method == 'PUT':
+        body = QueryDict(request.body)
+        lst = get_object_or_404(
+            List,
+            pk=body.get('pk'),
+            board__pk=kwargs.get('board_pk'),
+            board__members=request.user
+        )
+        lst.is_archived = False
+        lst.save()
+
+        return HttpResponse(
+            json.dumps({
+                'unarchive_list': 'success'
+            }),
+            content_type='application/json'
+        )
+
+
+def unarchive_card(request, *args, **kwargs):
+    if request.method == 'PUT':
+        body = QueryDict(request.body)
+        card = get_object_or_404(
+            Card,
+            pk=body.get('pk'),
+            lst__board__pk=kwargs.get('board_pk'),
+            lst__board__members=request.user
+        )
+        card.is_archived = False
+        card.save()
+
+        return HttpResponse(
+            json.dumps({
+                'unarchive_card': 'success'
             }),
             content_type='application/json'
         )

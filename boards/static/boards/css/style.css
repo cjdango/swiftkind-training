@@ -1,6 +1,12 @@
-html, body, main {
+html,
+body,
+main {
     height: 100%;
-    overflow: hidden;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
 }
 
 .sidenav {
@@ -13,8 +19,12 @@ html, body, main {
     background-color: rgb(46, 46, 46);
     overflow-x: hidden;
     transition: 0.5s;
-    padding-top: 60px;
     color: #f1f1f1;
+}
+
+.sidenav>.sticky-top {
+    padding-top: 70px;
+    background: inherit;
 }
 
 .sidenav a {
@@ -80,4 +90,9 @@ html, body, main {
     max-height: 300px;
     left: 9px !important;
     overflow: auto;
+}
+
+#mySidenav > .list-group-flush:last-child .list-group-item:last-child {
+    margin-bottom: 1px !important;
+    border-bottom: 1px solid rgba(255, 255, 255) !important;
 }

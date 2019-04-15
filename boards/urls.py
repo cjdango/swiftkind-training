@@ -15,6 +15,10 @@ from .views import (
     set_list_title,
     set_card_title,
     leave_board,
+    fetch_archived_lists,
+    fetch_archived_cards,
+    unarchive_list,
+    unarchive_card,
 )
 
 app_name = 'boards'
@@ -24,6 +28,14 @@ urlpatterns = [
     path('boards/<int:pk>/leave-board/', leave_board, name='leave_board'),
     path('boards/<int:pk>/activity-log/',
          BoardActivityLogView.as_view(), name='activity_log'),
+    path('boards/<int:board_pk>/archived-lists/',
+         fetch_archived_lists, name='fetch_archived_lists'),
+    path('boards/<int:board_pk>/archived-cards/',
+         fetch_archived_cards, name='fetch_archived_cards'),
+    path('boards/<int:board_pk>/unarchive-list/',
+         unarchive_list, name='unarchive_list'),
+    path('boards/<int:board_pk>/unarchive-card/',
+         unarchive_card, name='unarchive_card'),
     path('boards/<int:board_pk>/lists/set-order/',
          set_list_order, name='set_list_order'),
     path('boards/<int:board_pk>/lists/<int:list_pk>/set-title/',

@@ -5,16 +5,39 @@
 
 {% block content %}
     <div id="mySidenav" class="sidenav">
-        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-        <p class="text-center text-nowrap"><button class="btn btn-link text-danger" onclick="leaveBoard()">
-            {% if user == board.owner %}
-                Archive Board
-            {% else %}
-                Leave Board
-            {% endif %}
-        </button></p>
-        <p class="lead text-center text-nowrap">Activity log</p>
-        <ul class="activity-log list-group list-group-flush"></ul>
+        <div class="sticky-top border-bottom border-light">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+            <div class="menu">
+                <p class="text-right text-nowrap mb-0 py-0 menu-item">
+                    <button class="btn btn-link text-danger py-0" onclick="leaveBoard()">
+                        {% if user == board.owner %}
+                            Archive this board
+                        {% else %}
+                            Leave Board
+                        {% endif %}
+                    </button>
+                </p>
+                <p class="text-right text-nowrap mb-0 menu-item" data-title="Activity Log" data-toggle=".activity-log">
+                    <button class="btn btn-link text-info py-0">
+                        Activity Log
+                    </button>
+                </p>
+                <p class="text-right text-nowrap mb-0 menu-item" data-title="Archived Lists" data-toggle=".archived-lists">
+                    <button class="btn btn-link text-info py-0">
+                        Archived Lists
+                    </button>
+                </p>
+                <p class="text-right text-nowrap mb-0 menu-item" data-title="Archived Cards" data-toggle=".archived-cards">
+                    <button class="btn btn-link text-info py-0">
+                        Archived Cards
+                    </button>
+                </p>
+                <p class="lead text-center text-nowrap menu-title">Activity Log</p>
+            </div>
+        </div>
+        <ul class="activity-log menu-selector list-group list-group-flush"></ul>
+        <ul class="archived-lists menu-selector list-group list-group-flush" style="display: none;"></ul>
+        <ul class="archived-cards menu-selector list-group list-group-flush" style="display: none;"></ul>
     </div>
 
     <!-- Modal -->
@@ -89,7 +112,7 @@
                 {% endfor %}
             </div>
         </ul>
-    </div>    
+    </div>
 {% endblock content %}
 
 {% block app_script %}
@@ -98,6 +121,17 @@
     </script>
     <script>
         const comment = $('#card-modal .new-comment')
+
+        $(".menu-item").on("click", (e) => {
+            e.preventDefault();
+            const parent = $(e.target).parent()
+            const selector = parent.data("toggle");
+            const menuTitle = parent.data("title")
+
+            $(".menu-selector").hide();
+            $(".menu-title").html(menuTitle)
+            $(selector).show();            
+        });
 
         $('#card-modal').modal({
             backdrop: 'static',
@@ -190,6 +224,8 @@
         });
 
         fetchActivityLog()
+        fetchArchivedLists()
+        fetchArchivedCards()
 
         function leaveBoard() {
             $.ajax({
@@ -342,6 +378,61 @@
             });
         }
 
+        function fetchArchivedLists() {
+            $.ajax({
+                type: 'GET',
+                url: 'archived-lists/',
+                contentType: 'application/json',
+                success: function (data, textStatus, xhr) {
+                    $('#mySidenav .archived-lists').html('')
+                    const { archived_lists } = data
+                    archived_lists.forEach(list => {
+                        $('#mySidenav .archived-lists').append(
+                        `<li class="list-group-item d-flex justify-content-between 
+                            align-items-center bg-transparent border-light text-nowrap">
+                            <div>${list.title}</div>
+                            <button class="btn btn-success btn-sm" onclick="unarchiveList(${list.id})">Send to board</button>
+                        </li>`)
+                    })
+                },  
+                error: function (xhr, textStatus, errorThrown) {  
+                    console.log('Error in Operation');
+                    if (xhr.status === 404) {
+                        $('#mySidenav .archived-lists')
+                            .append('<p class="text-center font-italic mt-2">No archived lists</p>')
+                    }
+                }  
+            });
+        }
+
+        function fetchArchivedCards() {
+            $.ajax({
+                type: 'GET',
+                url: 'archived-cards/',
+                contentType: 'application/json',
+                success: function (data, textStatus, xhr) {
+                    $('#mySidenav .archived-cards').html('')
+                    const { archived_cards } = data
+                    archived_cards.forEach(card => {
+                        $('#mySidenav .archived-cards').append(
+                        `<li class="list-group-item d-flex justify-content-between 
+                            align-items-center bg-transparent border-light text-nowrap">
+                            <div>${card.title}</div>
+                            <button class="btn btn-success btn-sm" onclick="unarchiveCard(${card.id})">Send to board</button>
+                        </li>`)
+                    })
+                    console.log(data)
+                },  
+                error: function (xhr, textStatus, errorThrown) {  
+                    console.log('Error in Operation');
+                    if (xhr.status === 404) {
+                        $('#mySidenav .archived-cards')
+                            .append('<p class="text-center font-italic mt-2">No archived cards</p>')
+                    }
+                }  
+            });
+        }
+
         function fetchCard(listPK, cardPK) {
             $.ajax({
                 type: 'GET',
@@ -372,6 +463,36 @@
 
                     console.log(data)
                     $('#card-modal').modal('show');
+                },  
+                error: function (xhr, textStatus, errorThrown) {  
+                    console.log('Error in Operation');  
+                }  
+            });
+        }
+
+        function unarchiveList(pk) {
+            $.ajax({
+                type: 'PUT',
+                url: 'unarchive-list/',
+                data: { pk },  
+                contentType: 'application/json',
+                success: function (data, textStatus, xhr) {
+                    window.location.href = ''
+                },  
+                error: function (xhr, textStatus, errorThrown) {  
+                    console.log('Error in Operation');  
+                }  
+            });
+        }
+
+        function unarchiveCard(pk) {
+            $.ajax({
+                type: 'PUT',
+                url: 'unarchive-card/',
+                data: { pk },  
+                contentType: 'application/json',
+                success: function (data, textStatus, xhr) {
+                    window.location.href = ''
                 },  
                 error: function (xhr, textStatus, errorThrown) {  
                     console.log('Error in Operation');  
