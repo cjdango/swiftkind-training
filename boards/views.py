@@ -362,6 +362,27 @@ class CardCommentView(LoginRequiredMixin, View):
         comment.is_archived = True
         comment.save()
 
+        comment_context = comment.comment
+        card = comment.card
+        lst = card.lst
+        board = lst.board
+
+        BoardActivityLog.objects.create(
+            board=board,
+            actor=request.user,
+            verb='archived',
+            target=card,
+            action=comment)
+
+        for member in board.members.exclude(email=request.user):
+            send_mail(
+                'Board activity',
+                f'{request.user.username} archived {comment_context} comment in {card} card, {lst} list, {board} board.',
+                'trello.clone@example.com',
+                [member.email],
+                fail_silently=False,
+            )
+
         return HttpResponse(
             json.dumps({
                 'archived': model_to_dict(comment)
