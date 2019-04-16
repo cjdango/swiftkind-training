@@ -183,11 +183,11 @@ class BoardDetailView(LoginRequiredMixin, View):
         lst.save()
 
         BoardActivityLog.objects.create(
-                board=lst.board,
-                actor=self.request.user,
-                verb='archived',
-                target=lst.board,
-                action=lst)
+            board=lst.board,
+            actor=self.request.user,
+            verb='archived',
+            target=lst.board,
+            action=lst)
 
         for member in lst.board.members.exclude(email=request.user):
             send_mail(
@@ -197,7 +197,6 @@ class BoardDetailView(LoginRequiredMixin, View):
                 [member.email],
                 fail_silently=False,
             )
-
 
         return HttpResponse(
             json.dumps({
@@ -326,6 +325,22 @@ class CardListView(LoginRequiredMixin, View):
         card = lst.card_set.get(pk=body.get('pk'))
         card.is_archived = True
         card.save()
+
+        BoardActivityLog.objects.create(
+            board=board,
+            actor=self.request.user,
+            verb='archived',
+            target=lst,
+            action=card)
+
+        for member in lst.board.members.exclude(email=request.user):
+            send_mail(
+                'Board activity',
+                f'{request.user.username} archived {card} card in {lst} list, {board} board.',
+                'trello.clone@example.com',
+                [member.email],
+                fail_silently=False,
+            )
 
         return HttpResponse(
             json.dumps({
