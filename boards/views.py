@@ -181,6 +181,24 @@ class BoardDetailView(LoginRequiredMixin, View):
 
         lst.is_archived = True
         lst.save()
+
+        BoardActivityLog.objects.create(
+                board=lst.board,
+                actor=self.request.user,
+                verb='archived',
+                target=lst.board,
+                action=lst)
+
+        for member in lst.board.members.exclude(email=request.user):
+            send_mail(
+                'Board activity',
+                f'{request.user.username} archived {lst} list from {lst.board} board.',
+                'trello.clone@example.com',
+                [member.email],
+                fail_silently=False,
+            )
+
+
         return HttpResponse(
             json.dumps({
                 'archived': model_to_dict(lst),
