@@ -19,6 +19,10 @@ from .views import (
     fetch_archived_cards,
     unarchive_list,
     unarchive_card,
+    add_label,
+    delete_label,
+    card_add_label,
+    card_remove_label,
 )
 
 app_name = 'boards'
@@ -28,6 +32,14 @@ urlpatterns = [
     path('boards/<int:pk>/leave-board/', leave_board, name='leave_board'),
     path('boards/<int:pk>/activity-log/',
          BoardActivityLogView.as_view(), name='activity_log'),
+    path('boards/<int:board_pk>/add-label/',
+         add_label, name='add_label'),
+    path('boards/<int:board_pk>/card-add-label/',
+         card_add_label, name='card_add_label'),
+    path('boards/<int:board_pk>/card-remove-label/',
+         card_remove_label, name='card_remove_label'),
+    path('boards/<int:board_pk>/delete-label/',
+         delete_label, name='delete_label'),
     path('boards/<int:board_pk>/archived-lists/',
          fetch_archived_lists, name='fetch_archived_lists'),
     path('boards/<int:board_pk>/archived-cards/',

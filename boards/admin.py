@@ -7,6 +7,7 @@ from .models import (
     BoardInvitation,
     CardComment,
     BoardActivityLog,
+    Label,
 )
 
 admin.site.register(BoardInvitation)
@@ -15,3 +16,4 @@ admin.site.register(Board)
 admin.site.register(List)
 admin.site.register(Card)
 admin.site.register(CardComment)
+admin.site.register(Label)

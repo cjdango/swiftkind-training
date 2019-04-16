@@ -77,11 +77,35 @@ class List(models.Model):
         return super(List, self).save(*args, **kwargs)
 
 
+class Label(models.Model):
+    COLOR_CHOICES = (
+        ('primary', 'Primary'),
+        ('secondary', 'Secondary'),
+        ('success', 'Success'),
+        ('danger', 'Danger'),
+        ('warning', 'Warning'),
+        ('info', 'Info'),
+        ('light', 'Light'),
+        ('dark', 'Dark'),
+    )
+
+    color = models.CharField(max_length=9, choices=COLOR_CHOICES)
+    text = models.CharField(max_length=50, null=True)
+    board = models.ForeignKey(Board, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = (('color', 'board'), ('text', 'board'),)
+
+    def __str__(self):
+        return self.text
+
+
 class Card(models.Model):
     title = models.CharField(max_length=50)
     lst = models.ForeignKey(List, on_delete=models.CASCADE)
     position = models.PositiveIntegerField()
     is_archived = models.BooleanField(default=False)
+    labels = models.ManyToManyField(Label)
 
     class Meta:
         ordering = ['position']

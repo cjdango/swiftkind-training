@@ -14,6 +14,7 @@ from django.forms.models import model_to_dict
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError
 
 from .models import (
     Board,
@@ -22,6 +23,7 @@ from .models import (
     CardComment,
     BoardActivityLog,
     List,
+    Label
 )
 from .forms import CreateBoardForm, CreateListForm
 
@@ -234,6 +236,7 @@ class CardListView(LoginRequiredMixin, View):
         lst = board.list_set.get(pk=kwargs.get('list_pk'))
         card = lst.card_set.get(pk=request.GET.get('pk'))
         comments = list(card.cardcomment_set.values())
+        labels = list(card.labels.values())
 
         for comment in comments:
             frm_user = get_user_model().objects.get(
@@ -243,7 +246,7 @@ class CardListView(LoginRequiredMixin, View):
 
         return HttpResponse(
             json.dumps({
-                'card': model_to_dict(card),
+                'card_labels': labels,
                 'card_comments': comments,
                 'redirect': reverse('boards:board_detail',
                                     args=[str(board.pk)])
@@ -650,6 +653,125 @@ def unarchive_card(request, *args, **kwargs):
         return HttpResponse(
             json.dumps({
                 'unarchive_card': 'success'
+            }),
+            content_type='application/json'
+        )
+
+
+@login_required
+def add_label(request, *args, **kwargs):
+    if request.method == 'POST':
+        body = QueryDict(request.body)
+        color = body.get('color')
+        text = body.get('text')
+        board = get_object_or_404(
+            Board,
+            pk=kwargs.get('board_pk'),
+            members=request.user
+        )
+        try:
+            label = Label.objects.create(
+                text=text,
+                color=color,
+                board=board
+            )
+        except IntegrityError as e:
+            err1 = 'UNIQUE constraint failed: boards_label.text, boards_label.board_id'
+            err2 = 'UNIQUE constraint failed: boards_label.color, boards_label.board_id'
+
+            if err1 in str(e):
+                message = f'label with text "{text}" already exist in this board.'
+            elif err2 in str(e):
+                message = f'label with color "{color}" already exist in this board.'
+
+            return HttpResponse(
+                json.dumps({
+                    'status': 'failed',
+                    'message': message
+                }),
+                content_type='application/json'
+            )
+
+        return HttpResponse(
+            json.dumps({
+                'status': 'success',
+                'message': f'Successfuly added {label.text} in {label.board} board',
+                'label': model_to_dict(label)
+            }),
+            content_type='application/json'
+        )
+
+
+@login_required
+def delete_label(request, *args, **kwargs):
+    if request.method == 'DELETE':
+        body = QueryDict(request.body)
+        label = get_object_or_404(
+            Label,
+            pk=body.get('pk'),
+            board__pk=kwargs.get('board_pk'),
+            board__members=request.user
+        )
+        label.delete()
+
+        return HttpResponse(
+            json.dumps({
+                'status': 'success',
+                'message': f'Label successfuly deleted',
+            }),
+            content_type='application/json'
+        )
+
+
+@login_required
+def card_add_label(request, *args, **kwargs):
+    if request.method == 'POST':
+        body = QueryDict(request.body)
+        card = get_object_or_404(
+            Card,
+            pk=body.get('cardPK'),
+            lst__board__pk=kwargs.get('board_pk'),
+            lst__board__members=request.user
+        )
+        label = get_object_or_404(
+            Label,
+            pk=body.get('labelPK'),
+            board__pk=kwargs.get('board_pk'),
+            board__members=request.user
+        )
+        card.labels.add(label)
+
+        return HttpResponse(
+            json.dumps({
+                'status': 'success',
+                'message': f'Label successfuly added',
+            }),
+            content_type='application/json'
+        )
+
+
+@login_required
+def card_remove_label(request, *args, **kwargs):
+    if request.method == 'POST':
+        body = QueryDict(request.body)
+        card = get_object_or_404(
+            Card,
+            pk=body.get('cardPK'),
+            lst__board__pk=kwargs.get('board_pk'),
+            lst__board__members=request.user
+        )
+        label = get_object_or_404(
+            Label,
+            pk=body.get('labelPK'),
+            board__pk=kwargs.get('board_pk'),
+            board__members=request.user
+        )
+        card.labels.remove(label)
+
+        return HttpResponse(
+            json.dumps({
+                'status': 'success',
+                'message': f'Label successfuly removed',
             }),
             content_type='application/json'
         )
