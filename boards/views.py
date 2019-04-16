@@ -121,9 +121,19 @@ class BoardListView(LoginRequiredMixin, View):
         board = self.request.user.board_set.get(pk=body.get('pk'))
         board.is_archived = True
         board.save()
+
+        for member in board.members.exclude(email=request.user):
+            send_mail(
+                'Board activity',
+                f'{request.user.username} archived the {board} board.',
+                'trello.clone@example.com',
+                [member.email],
+                fail_silently=False,
+            )
+
         return HttpResponse(
             json.dumps({
-                'archived': model_to_dict(board),
+                'archived_board': 'success',
                 'redirect': reverse('boards:home')
             }),
             content_type='application/json'
@@ -523,6 +533,16 @@ def leave_board(request, *args, **kwargs):
         if board.owner == request.user:
             board.is_archived = True
             board.save()
+
+            for member in board.members.exclude(email=request.user):
+                send_mail(
+                    'Board activity',
+                    f'{request.user.username} archived the {board} board.',
+                    'trello.clone@example.com',
+                    [member.email],
+                    fail_silently=False,
+                )
+
             return HttpResponse(
                 json.dumps({
                     'archived_board': 'success',
@@ -532,6 +552,15 @@ def leave_board(request, *args, **kwargs):
             )
 
         board.members.remove(request.user)
+
+        for member in board.members.exclude(email=request.user):
+            send_mail(
+                'Board activity',
+                f'{request.user.username} leave the {board} board.',
+                'trello.clone@example.com',
+                [member.email],
+                fail_silently=False,
+            )
 
         return HttpResponse(
             json.dumps({
